@@ -2,6 +2,8 @@
 
 import * as Helpers from '../lib/helpers'
 
+require('./common')
+
 describe('Helpers', function() {
 
   let env = process.env
@@ -29,6 +31,37 @@ describe('Helpers', function() {
       expect(function() {
         Helpers.identifyEnvironment()
       }).toThrow('Unable to determine environment')
+    })
+  })
+
+  describe('identifyEnvironmentAsync', function() {
+    it('returns an array', function() {
+      waitsForPromise(function() {
+        return Helpers.identifyEnvironmentAsync().then(function(raw) {
+          expect(Array.isArray(raw)).toBe(true)
+        })
+      })
+    })
+    it('contains a valid response', function() {
+      waitsForPromise(function() {
+        return Helpers.identifyEnvironmentAsync().then(function(raw) {
+          raw = raw.join('\n')
+          expect(raw).toContain('PATH=')
+          expect(raw).toContain('EDITOR=')
+          expect(raw).toContain('VISUAL=')
+          expect(raw).toContain('SHELL=')
+        })
+      })
+    })
+    it('throws an error if it cant work', function() {
+      process.env.SHELL = '/ha'
+      waitsForPromise(function() {
+        return Helpers.identifyEnvironmentAsync().then(function() {
+          expect(true).toBe(false)
+        }, function(error) {
+          expect(error.message).toBe('Unable to determine environment')
+        })
+      })
     })
   })
 
