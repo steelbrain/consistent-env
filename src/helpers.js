@@ -3,6 +3,7 @@
 import { spawnSync } from 'child_process'
 
 const LOCAL_BIN_PATH = '/usr/local/bin'
+export const CACHE_KEY = '__STEELBRAIN_CONSISTENT_ENV_V1'
 export const assign = Object.assign || function (target, source) {
   for (const key in source) {
     if (source.hasOwnProperty(key)) {
@@ -38,7 +39,11 @@ export function parse(rawEnvironment) {
 export function applySugar(environment) {
   let path = process.env.PATH ? process.env.PATH.split(':') : []
   if (environment.PATH) {
-    path = path.concat(environment.PATH.split(':'))
+    for (const chunk of environment.PATH.split(':')) {
+      if (chunk && path.indexOf(chunk) === -1) {
+        path.push(chunk)
+      }
+    }
   }
   if (path.indexOf(LOCAL_BIN_PATH) === -1) {
     path = [LOCAL_BIN_PATH].concat(path)
