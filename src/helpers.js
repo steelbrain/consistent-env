@@ -1,5 +1,6 @@
 'use strict'
 
+import Path from 'path'
 import { spawnSync } from 'child_process'
 
 const LOCAL_BIN_PATH = '/usr/local/bin'
@@ -47,6 +48,13 @@ export function applySugar(environment) {
   }
   if (path.indexOf(LOCAL_BIN_PATH) === -1) {
     path = [LOCAL_BIN_PATH].concat(path)
+  }
+  if (!environment.USER) {
+    if (process.env.USER) {
+      environment.USER = process.env.USER
+    } else if (environment.HOME) {
+      environment.USER = Path.basename(environment.HOME)
+    }
   }
 
   environment.PATH = path.join(':')
