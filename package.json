@@ -15,5 +15,6 @@
   "bugs": {
     "url": "https://github.com/steelbrain/consistent-env/issues"
   },
-  "homepage": "https://github.com/steelbrain/consistent-env"
+  "homepage": "https://github.com/steelbrain/consistent-env",
+  "keywords": []
 }
