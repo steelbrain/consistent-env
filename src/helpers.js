@@ -29,8 +29,8 @@ export function parse(rawEnvironment) {
   for (const chunk of rawEnvironment) {
     const index = chunk.indexOf('=')
     if (index !== -1) {
-      const key = chunk.slice(0, index)
-      const value = chunk.slice(index + 1)
+      const key = chunk.slice(0, index).trim()
+      const value = chunk.slice(index + 1).trim()
       environment[key] = value
     }
   }
