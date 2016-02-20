@@ -1,7 +1,7 @@
 'use strict'
 
 import Path from 'path'
-import { spawnSync } from 'child_process'
+import { spawn, spawnSync } from 'child_process'
 
 const LOCAL_BIN_PATH = '/usr/local/bin'
 export const CACHE_KEY = '__STEELBRAIN_CONSISTENT_ENV_V1'
@@ -22,6 +22,29 @@ export function identifyEnvironment() {
     throw new Error('Unable to determine environment')
   }
   return environment
+}
+
+export function identifyEnvironmentAsync() {
+  return new Promise(function(resolve, reject) {
+    const childProcess = spawn(process.env.SHELL, ['-ic', 'env; exit'])
+    const stdout = []
+    const timer = setTimeout(function() {
+      childProcess.kill()
+      reject()
+    }, 2000)
+    childProcess.stdout.on('data', function(chunk) {
+      stdout.push(chunk)
+    })
+    childProcess.on('close', function() {
+      clearTimeout(timer)
+      resolve(stdout.join('').trim().split('\n'))
+    })
+    childProcess.on('error', function(error) {
+      reject(error)
+    })
+  }).catch(function() {
+    throw new Error('Unable to determine environment')
+  })
 }
 
 export function parse(rawEnvironment) {
