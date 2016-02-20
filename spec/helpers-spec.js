@@ -22,8 +22,6 @@ describe('Helpers', function() {
     it('contains a valid response', function() {
       const raw = Helpers.identifyEnvironment().join('\n')
       expect(raw).toContain('PATH=')
-      expect(raw).toContain('EDITOR=')
-      expect(raw).toContain('VISUAL=')
       expect(raw).toContain('SHELL=')
     })
     it('throws an error if it cant work', function() {
@@ -47,8 +45,6 @@ describe('Helpers', function() {
         return Helpers.identifyEnvironmentAsync().then(function(raw) {
           raw = raw.join('\n')
           expect(raw).toContain('PATH=')
-          expect(raw).toContain('EDITOR=')
-          expect(raw).toContain('VISUAL=')
           expect(raw).toContain('SHELL=')
         })
       })
