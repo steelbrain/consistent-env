@@ -4,7 +4,8 @@
   "description": "A reliable way to get env",
   "main": "lib/index.js",
   "scripts": {
-    "test": "apm test"
+    "test": "apm test",
+    "compile": "ucompiler go"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,10 @@
     "url": "https://github.com/steelbrain/consistent-env/issues"
   },
   "homepage": "https://github.com/steelbrain/consistent-env",
-  "keywords": ["environment", "env"]
+  "keywords": ["environment", "env"],
+  "devDependencies": {
+    "ucompiler": "^3.1.7",
+    "ucompiler-plugin-babel": "^3.1.1",
+    "babel-preset-steelbrain": "^1.0.1"
+  }
 }
