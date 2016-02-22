@@ -16,8 +16,8 @@ export const assign = Object.assign || function (target, source) {
 
 export function identifyEnvironment() {
   let environment
+  const {command, parameters, options} = getCommand()
   try {
-    const {command, parameters, options} = getCommand()
     environment = spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
   } catch (_) {
     throw new Error('Unable to determine environment')
@@ -92,19 +92,14 @@ export function getCommand() {
   let parameters
   let options = {timeout: 3000, encoding: 'utf8'}
 
-  if (process.platform === 'darwin') {
-    parameters = ['-ic', 'env;exit']
-  } else {
-    // Linux
-    const shell = Path.basename(process.env.SHELL)
-    if (shell === 'bash') {
-      parameters = ['-c', 'source ~/.bashrc;env;exit']
-    } else if (shell === 'zsh') {
-      parameters = ['-c', 'source ~/.zshrc;env;exit']
-    } else if (shell === 'fish') {
-      parameters = ['-c', '. ~/.config/fish/config.fish;env;exit']
-    } else throw new Error('Unknown shell type')
-  }
+  const shell = Path.basename(process.env.SHELL)
+  if (shell === 'bash') {
+    parameters = ['-c', 'source ~/.bashrc;env;exit']
+  } else if (shell === 'zsh') {
+    parameters = ['-c', 'source ~/.zshrc;env;exit']
+  } else if (shell === 'fish') {
+    parameters = ['-c', '. ~/.config/fish/config.fish;env;exit']
+  } else throw new Error('Unknown shell type, please open a bug report stating your shell name')
 
   return {command, parameters, options}
 }
