@@ -16,8 +16,9 @@ export const assign = Object.assign || function (target, source) {
 
 export function identifyEnvironment() {
   let environment
+  const {command, parameters, options} = getCommand()
   try {
-    environment = spawnSync(process.env.SHELL, ['-ic', 'env; exit']).stdout.toString().trim().split('\n')
+    environment = spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
   } catch (_) {
     throw new Error('Unable to determine environment')
   }
@@ -26,7 +27,8 @@ export function identifyEnvironment() {
 
 export function identifyEnvironmentAsync() {
   return new Promise(function(resolve, reject) {
-    const childProcess = spawn(process.env.SHELL, ['-ic', 'env; exit'])
+    const {command, parameters, options} = getCommand()
+    const childProcess = spawn(command, parameters, options)
     const stdout = []
     const timer = setTimeout(function() {
       childProcess.kill()
@@ -83,4 +85,21 @@ export function applySugar(environment) {
   environment.PATH = path.join(':')
   environment.PWD = environment.OLDPWD = process.cwd()
   return environment
+}
+
+export function getCommand() {
+  let command = process.env.SHELL
+  let parameters
+  let options = {timeout: 3000, encoding: 'utf8'}
+
+  const shell = Path.basename(process.env.SHELL)
+  if (shell === 'bash') {
+    parameters = ['-c', 'source ~/.bashrc;env;exit']
+  } else if (shell === 'zsh') {
+    parameters = ['-c', 'source ~/.zshrc;env;exit']
+  } else if (shell === 'fish') {
+    parameters = ['-c', '. ~/.config/fish/config.fish;env;exit']
+  } else throw new Error('Unknown shell type, please open a bug report stating your shell name')
+
+  return {command, parameters, options}
 }

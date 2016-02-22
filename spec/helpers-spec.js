@@ -28,7 +28,7 @@ describe('Helpers', function() {
       process.env.SHELL = '/ha'
       expect(function() {
         Helpers.identifyEnvironment()
-      }).toThrow('Unable to determine environment')
+      }).toThrow()
     })
   })
 
