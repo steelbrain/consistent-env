@@ -19,8 +19,6 @@ describe('consistent-env', function() {
     expect(foundEnv.PATH).toContain('/usr/bin')
     expect(foundEnv.PATH).toContain('/bin')
     expect(foundEnv.SHELL).toBe(env.SHELL)
-    expect(foundEnv.EDITOR).toBe(env.EDITOR)
-    expect(foundEnv.VISUAL).toBe(env.VISUAL)
   })
 
   it('has a caching that works well', function() {
@@ -38,8 +36,6 @@ describe('consistent-env', function() {
         expect(foundEnv.PATH).toContain('/usr/bin')
         expect(foundEnv.PATH).toContain('/bin')
         expect(foundEnv.SHELL).toBe(env.SHELL)
-        expect(foundEnv.EDITOR).toBe(env.EDITOR)
-        expect(foundEnv.VISUAL).toBe(env.VISUAL)
       })
     })
   })
