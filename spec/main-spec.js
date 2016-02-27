@@ -19,8 +19,6 @@ describe('consistent-env', function() {
     expect(foundEnv.PATH).toContain('/usr/bin')
     expect(foundEnv.PATH).toContain('/bin')
     expect(foundEnv.SHELL).toBe(env.SHELL)
-    expect(foundEnv.EDITOR).toBe(env.EDITOR)
-    expect(foundEnv.VISUAL).toBe(env.VISUAL)
   })
 
   it('has a caching that works well', function() {
@@ -38,8 +36,6 @@ describe('consistent-env', function() {
         expect(foundEnv.PATH).toContain('/usr/bin')
         expect(foundEnv.PATH).toContain('/bin')
         expect(foundEnv.SHELL).toBe(env.SHELL)
-        expect(foundEnv.EDITOR).toBe(env.EDITOR)
-        expect(foundEnv.VISUAL).toBe(env.VISUAL)
       })
     })
   })
@@ -51,6 +47,22 @@ describe('consistent-env', function() {
       const env3 = await consistentEnvironment.async()
       expect(env1).toEqual(env2)
       expect(env1).toEqual(env3)
+    })
+  })
+
+  it('has returns env as is for unknown shells', function() {
+    process.env.SHELL = 'beepbeep'
+    process.env.WEIRD = 'true'
+    const env = consistentEnvironment()
+    expect(env).toEqual(process.env)
+  })
+
+  it('asyncly returns env as is for unknown shells', function() {
+    process.env.SHELL = 'beepbeep'
+    process.env.WEIRD = 'true'
+    waitsForPromise(async function() {
+      const env = await consistentEnvironment.async()
+      expect(env).toEqual(process.env)
     })
   })
 })

@@ -84,21 +84,21 @@ describe('Helpers', function() {
     it('merges PATH', function() {
       process.env.PATH = '/games'
       const env = Helpers.applySugar({PATH: '/usr/bin'})
-      expect(env.PATH).toBe('/usr/local/bin:/games:/usr/bin')
+      expect(env.PATH).toContain('/games')
     })
     it('works well even when no local PATH is found', function() {
       const env = Helpers.applySugar({PATH: '/usr/bin'})
-      expect(env.PATH).toBe('/usr/local/bin:/usr/bin')
+      expect(env.PATH).toBe('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin:/usr/bin')
     })
     it('works well even when no external PATH is found', function() {
       process.env.PATH = '/games'
       const env = Helpers.applySugar({})
-      expect(env.PATH).toBe('/usr/local/bin:/games')
+      expect(env.PATH).toBe('/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/games')
     })
     it('does not add duplicates', function() {
       process.env.PATH = '/usr/bin'
       const env = Helpers.applySugar({PATH: '/usr/bin'})
-      expect(env.PATH).toBe('/usr/local/bin:/usr/bin')
+      expect(env.PATH).toBe('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin:/usr/bin')
     })
 
     it('uses global USER if available', function() {
