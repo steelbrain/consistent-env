@@ -3,7 +3,7 @@
 import Path from 'path'
 import { spawn, spawnSync } from 'child_process'
 
-const LOCAL_BIN_PATH = '/usr/local/bin'
+const DEFAULT_PATHS = ['/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin']
 export const KNOWN_SHELLS = ['zsh', 'bash']
 export const CACHE_KEY = '__STEELBRAIN_CONSISTENT_ENV_V1'
 export const assign = Object.assign || function (target, source) {
@@ -72,8 +72,10 @@ export function applySugar(environment) {
       }
     }
   }
-  if (path.indexOf(LOCAL_BIN_PATH) === -1) {
-    path = [LOCAL_BIN_PATH].concat(path)
+  for (const entry of DEFAULT_PATHS) {
+    if (path.indexOf(entry) === -1) {
+      path = [entry].concat(path)
+    }
   }
   if (!environment.USER) {
     if (process.env.USER) {
