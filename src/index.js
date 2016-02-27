@@ -28,13 +28,13 @@ module.exports.async = function() {
     } else {
       const shellName = Path.basename(process.env.SHELL)
       if (KNOWN_SHELLS.indexOf(shellName) === -1) {
-        return assign({}, process.env)
+        resolve(assign({}, process.env))
+      } else {
+        resolve(identifyEnvironmentAsync().then(parse).then(applySugar).then(function(environment) {
+          global[CACHE_KEY] = environment
+          return environment
+        }))
       }
-
-      resolve(identifyEnvironmentAsync().then(parse).then(applySugar).then(function(environment) {
-        global[CACHE_KEY] = environment
-        return environment
-      }))
     }
   })
 }

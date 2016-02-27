@@ -49,4 +49,20 @@ describe('consistent-env', function() {
       expect(env1).toEqual(env3)
     })
   })
+
+  it('has returns env as is for unknown shells', function() {
+    process.env.SHELL = 'beepbeep'
+    process.env.WEIRD = 'true'
+    const env = consistentEnvironment()
+    expect(env).toEqual(process.env)
+  })
+
+  it('asyncly returns env as is for unknown shells', function() {
+    process.env.SHELL = 'beepbeep'
+    process.env.WEIRD = 'true'
+    waitsForPromise(async function() {
+      const env = await consistentEnvironment.async()
+      expect(env).toEqual(process.env)
+    })
+  })
 })
