@@ -1,6 +1,6 @@
 {
   "name": "consistent-env",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A reliable way to get env",
   "main": "lib/index.js",
   "scripts": {
