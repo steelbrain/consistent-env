@@ -4,6 +4,7 @@ import Path from 'path'
 import { spawn, spawnSync } from 'child_process'
 
 const LOCAL_BIN_PATH = '/usr/local/bin'
+export const KNOWN_SHELLS = ['zsh', 'bash']
 export const CACHE_KEY = '__STEELBRAIN_CONSISTENT_ENV_V1'
 export const assign = Object.assign || function (target, source) {
   for (const key in source) {
@@ -97,9 +98,7 @@ export function getCommand() {
     parameters = ['-c', 'source ~/.bashrc;env;exit']
   } else if (shell === 'zsh') {
     parameters = ['-c', 'source ~/.zshrc;env;exit']
-  } else if (shell === 'fish') {
-    parameters = ['-c', '. ~/.config/fish/config.fish;env;exit']
-  } else throw new Error('Unknown shell type, please open a bug report stating your shell name')
+  }
 
   return {command, parameters, options}
 }
