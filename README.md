@@ -15,6 +15,13 @@ module.exports = function(): Object<string, string>
 module.exports.async = function(): Promise<Object<string, string>>
 ```
 
+## FAQ
+
+#### Unable to determine environment
+
+If you are on OSX and using the System Default ZSH, It has a bug that causes it to live forever, thus triggering timeout
+for `consistent-env`, to fix it you should install `zsh` using homebrew, we recommend [Rick's Guide](http://rick.cogley.info/post/use-homebrew-zsh-instead-of-the-osx-default/).
+
 ## License
 
 This project is licensed under the terms of MIT License, see the LICENSE file for more info
