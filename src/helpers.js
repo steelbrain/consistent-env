@@ -4,7 +4,7 @@ import Path from 'path'
 import { spawn, spawnSync } from 'child_process'
 
 const DEFAULT_PATHS = ['/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin']
-export const KNOWN_SHELLS = ['zsh', 'bash']
+export const KNOWN_SHELLS = ['zsh', 'bash', 'fish']
 export const CACHE_KEY = '__STEELBRAIN_CONSISTENT_ENV_V1'
 export const assign = Object.assign || function (target, source) {
   for (const key in source) {
@@ -100,6 +100,8 @@ export function getCommand() {
     parameters = ['-c', 'source ~/.bashrc;env;exit']
   } else if (shell === 'zsh') {
     parameters = ['-c', 'source ~/.zshrc;env;exit']
+  } else if (shell === 'fish') {
+    parameters = ['-c', 'source ~/.config/fish/config.fish;env;exit']
   }
 
   return {command, parameters, options}

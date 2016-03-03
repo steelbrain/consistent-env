@@ -1,3 +1,7 @@
+## v1.1.1
+
+- Add support for `fish` shell
+
 ## v1.1.0
 
 - Add more defaults PATH locations
