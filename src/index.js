@@ -14,9 +14,14 @@ module.exports = function() {
   if (KNOWN_SHELLS.indexOf(shellName) === -1) {
     return assign({}, process.env)
   }
-  const environment = applySugar(parse(identifyEnvironment()))
-  global[CACHE_KEY] = environment
-  return environment
+  try {
+    const environment = applySugar(parse(identifyEnvironment()))
+    global[CACHE_KEY] = environment
+    return environment
+  } catch (error) {
+    console.error('[consistent-env] Unable to determine environment', error)
+    return assign({}, process.env)
+  }
 }
 
 module.exports.async = function() {
@@ -36,5 +41,8 @@ module.exports.async = function() {
         }))
       }
     }
+  }).catch(function(error) {
+    console.error('[consistent-env] Unable to determine environment', error)
+    return assign({}, process.env)
   })
 }
