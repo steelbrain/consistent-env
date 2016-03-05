@@ -1,3 +1,7 @@
+## v1.1.2
+
+- Do not throw errors if there were problems detecting environment, instead log them to console
+
 ## v1.1.1
 
 - Add support for `fish` shell
