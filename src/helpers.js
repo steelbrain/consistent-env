@@ -18,11 +18,7 @@ export const assign = Object.assign || function (target, source) {
 export function identifyEnvironment() {
   let environment
   const {command, parameters, options} = getCommand()
-  try {
-    environment = spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
-  } catch (_) {
-    throw new Error('Unable to determine environment')
-  }
+  environment = spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
   return environment
 }
 
@@ -33,7 +29,7 @@ export function identifyEnvironmentAsync() {
     const stdout = []
     const timer = setTimeout(function() {
       childProcess.kill()
-      reject()
+      reject(new Error('Process execution timed out'))
     }, 2000)
     childProcess.stdout.on('data', function(chunk) {
       stdout.push(chunk)
