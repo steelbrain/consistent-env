@@ -41,8 +41,6 @@ export function identifyEnvironmentAsync() {
     childProcess.on('error', function(error) {
       reject(error)
     })
-  }).catch(function(error) {
-    throw error;
   })
 }
 
