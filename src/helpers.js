@@ -30,7 +30,7 @@ export function identifyEnvironmentAsync() {
     const timer = setTimeout(function() {
       childProcess.kill()
       reject(new Error('Process execution timed out'))
-    }, 2000)
+    }, 4000)
     childProcess.stdout.on('data', function(chunk) {
       stdout.push(chunk)
     })
