@@ -3,6 +3,7 @@
 import Path from 'path'
 import { spawn, spawnSync } from 'child_process'
 
+const SPAWN_TIMEOUT = 4000
 const DEFAULT_PATHS = ['/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin', '/usr/local/sbin']
 export const KNOWN_SHELLS = ['zsh', 'bash', 'fish']
 export const CACHE_KEY = '__STEELBRAIN_CONSISTENT_ENV_V1'
@@ -18,6 +19,7 @@ export const assign = Object.assign || function (target, source) {
 export function identifyEnvironment() {
   let environment
   const {command, parameters, options} = getCommand()
+  options.timeout = SPAWN_TIMEOUT
   environment = spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
   return environment
 }
@@ -30,7 +32,7 @@ export function identifyEnvironmentAsync() {
     const timer = setTimeout(function() {
       childProcess.kill()
       reject(new Error('Process execution timed out'))
-    }, 4000)
+    }, SPAWN_TIMEOUT)
     childProcess.stdout.on('data', function(chunk) {
       stdout.push(chunk)
     })
@@ -87,7 +89,7 @@ export function applySugar(environment) {
 export function getCommand() {
   let command = process.env.SHELL
   let parameters
-  let options = {timeout: 3000, encoding: 'utf8'}
+  let options = {encoding: 'utf8'}
 
   const shell = Path.basename(process.env.SHELL)
   if (shell === 'bash') {
