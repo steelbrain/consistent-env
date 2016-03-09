@@ -1,3 +1,8 @@
+## Upcoming
+
+- Execution timeout has been increased to 4 seconds
+- Show more meaningful errors
+
 ## v1.1.2
 
 - Do not throw errors if there were problems detecting environment, instead log them to console
