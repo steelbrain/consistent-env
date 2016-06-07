@@ -4,7 +4,7 @@ import Path from 'path'
 import { CACHE_KEY, KNOWN_SHELLS, assign, parse, applySugar, identifyEnvironment, identifyEnvironmentAsync } from './helpers'
 
 module.exports = function() {
-  if (process.platform === 'win32') {
+  if (process.platform === 'win32' || !process.env.SHELL) {
     return assign({}, process.env)
   }
   if (global[CACHE_KEY]) {
@@ -26,7 +26,7 @@ module.exports = function() {
 
 module.exports.async = function() {
   return new Promise(function(resolve) {
-    if (process.platform === 'win32') {
+    if (process.platform === 'win32' || !process.env.SHELL) {
       resolve(assign({}, process.env))
     } else if (global[CACHE_KEY]) {
       resolve(assign({}, global[CACHE_KEY]))

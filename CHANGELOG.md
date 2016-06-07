@@ -1,7 +1,8 @@
 ## Upcoming
 
-- Execution timeout has been increased to 4 seconds
 - Show more meaningful errors
+- Support environments without a shell
+- Execution timeout has been increased to 4 seconds
 
 ## v1.1.2
 
