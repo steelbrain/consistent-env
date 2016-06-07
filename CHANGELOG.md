@@ -1,4 +1,4 @@
-## Upcoming
+## v1.2.0
 
 - Show more meaningful errors
 - Support environments without a shell
