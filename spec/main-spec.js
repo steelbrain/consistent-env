@@ -65,4 +65,13 @@ describe('consistent-env', function() {
       expect(env).toEqual(process.env)
     })
   })
+
+  it('can work without a shell', function() {
+    delete process.env.SHELL
+    process.env.HEY = 'YES'
+    waitsForPromise(async function() {
+      const env = await consistentEnvironment.async()
+      expect(env).toEqual(process.env)
+    })
+  })
 })
