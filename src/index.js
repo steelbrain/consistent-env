@@ -1,9 +1,9 @@
-'use strict'
+/* @flow */
 
 import Path from 'path'
 import { CACHE_KEY, KNOWN_SHELLS, assign, parse, applySugar, identifyEnvironment, identifyEnvironmentAsync } from './helpers'
 
-module.exports = function() {
+module.exports = function(): Object {
   if (process.platform === 'win32' || !process.env.SHELL) {
     return assign({}, process.env)
   }
@@ -24,7 +24,7 @@ module.exports = function() {
   }
 }
 
-module.exports.async = function() {
+module.exports.async = function(): Promise<Object> {
   return new Promise(function(resolve) {
     if (process.platform === 'win32' || !process.env.SHELL) {
       resolve(assign({}, process.env))
