@@ -1,7 +1,7 @@
 /* @flow */
 
 import { it } from 'jasmine-fix'
-import * as Helpers from '../lib/helpers'
+import * as Helpers from '../src/helpers'
 
 describe('Helpers', function() {
   const globalEnd = process.env

@@ -1,8 +1,8 @@
 /* @flow */
 
 import { it } from 'jasmine-fix'
-import consistentEnvironment from '../'
-import { CACHE_KEY } from '../lib/helpers'
+import consistentEnvironment from '../src'
+import { CACHE_KEY } from '../src/helpers'
 
 describe('consistent-env', function() {
   const globalEnv = process.env

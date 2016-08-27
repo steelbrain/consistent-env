@@ -45,7 +45,7 @@ export function identifyEnvironmentAsync() {
   })
 }
 
-export function parse(rawEnvironment: Array<string>) {
+export function parse(rawEnvironment: Array<string>): Object {
   const environment = {}
   for (const chunk of rawEnvironment) {
     const index = chunk.indexOf('=')
