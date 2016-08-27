@@ -1,17 +1,15 @@
-'use babel'
+/* @flow */
 
+import { it } from 'jasmine-fix'
 import * as Helpers from '../lib/helpers'
 
-require('./common')
-
 describe('Helpers', function() {
-
-  let env = process.env
-  afterEach(function() {
-    process.env = env
-  })
+  const globalEnd = process.env
   beforeEach(function() {
-    process.env = {SHELL: process.env.SHELL}
+    process.env = { SHELL: process.env.SHELL }
+  })
+  afterEach(function() {
+    process.env = globalEnd
   })
 
   describe('identifyEnvironment', function() {
@@ -33,31 +31,25 @@ describe('Helpers', function() {
   })
 
   describe('identifyEnvironmentAsync', function() {
-    it('returns an array', function() {
-      waitsForPromise(function() {
-        return Helpers.identifyEnvironmentAsync().then(function(raw) {
-          expect(Array.isArray(raw)).toBe(true)
-        })
-      })
+    it('returns an array', async function() {
+      const raw = await Helpers.identifyEnvironmentAsync()
+      expect(Array.isArray(raw)).toBe(true)
     })
-    it('contains a valid response', function() {
-      waitsForPromise(function() {
-        return Helpers.identifyEnvironmentAsync().then(function(raw) {
-          raw = raw.join('\n')
-          expect(raw).toContain('PATH=')
-          expect(raw).toContain('SHELL=')
-        })
-      })
+    it('contains a valid response', async function() {
+      let raw = await Helpers.identifyEnvironmentAsync()
+      raw = raw.join('\n')
+      expect(raw).toContain('PATH=')
+      expect(raw).toContain('SHELL=')
     })
-    it('throws an error if it cant work', function() {
+    it('throws an error if it cant work', async function() {
       process.env.SHELL = '/ha'
-      waitsForPromise(function() {
-        return Helpers.identifyEnvironmentAsync().then(function() {
-          expect(true).toBe(false)
-        }, function(error) {
-          expect(typeof error.message).toBe('string')
-        })
-      })
+      try {
+        await Helpers.identifyEnvironmentAsync()
+        expect(false).toBe(true)
+      } catch (error) {
+        expect(typeof error.message).toBe('string')
+        expect(error.code).toBe('ENOENT')
+      }
     })
   })
 
@@ -83,11 +75,11 @@ describe('Helpers', function() {
 
     it('merges PATH', function() {
       process.env.PATH = '/games'
-      const env = Helpers.applySugar({PATH: '/usr/bin'})
+      const env = Helpers.applySugar({ PATH: '/usr/bin' })
       expect(env.PATH).toContain('/games')
     })
     it('works well even when no local PATH is found', function() {
-      const env = Helpers.applySugar({PATH: '/usr/bin'})
+      const env = Helpers.applySugar({ PATH: '/usr/bin' })
       expect(env.PATH).toBe('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin:/usr/bin')
     })
     it('works well even when no external PATH is found', function() {
@@ -97,7 +89,7 @@ describe('Helpers', function() {
     })
     it('does not add duplicates', function() {
       process.env.PATH = '/usr/bin'
-      const env = Helpers.applySugar({PATH: '/usr/bin'})
+      const env = Helpers.applySugar({ PATH: '/usr/bin' })
       expect(env.PATH).toBe('/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin:/usr/bin')
     })
 
@@ -108,20 +100,19 @@ describe('Helpers', function() {
     })
     it('guesses from HOME if available', function() {
       let env
-      env = Helpers.applySugar({HOME: '/home/steel'})
+      env = Helpers.applySugar({ HOME: '/home/steel' })
       expect(env.USER).toBe('steel')
 
-      env = Helpers.applySugar({HOME: '/Users/steel'})
+      env = Helpers.applySugar({ HOME: '/Users/steel' })
       expect(env.USER).toBe('steel')
 
-      env = Helpers.applySugar({HOME: '/root'})
+      env = Helpers.applySugar({ HOME: '/root' })
       expect(env.USER).toBe('root')
     })
     it('prefers USER env over HOME', function() {
       process.env.USER = 'steel'
-      const env = Helpers.applySugar({HOME: '/root'})
+      const env = Helpers.applySugar({ HOME: '/root' })
       expect(env.USER).toBe('steel')
     })
   })
-
 })

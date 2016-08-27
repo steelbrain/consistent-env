@@ -1,6 +1,7 @@
-'use strict'
+/* @flow */
 
 import Path from 'path'
+import uniqueArray from 'lodash.uniq'
 import { spawn, spawnSync } from 'child_process'
 
 const SPAWN_TIMEOUT = 4000
@@ -9,7 +10,7 @@ export const KNOWN_SHELLS = ['zsh', 'bash', 'fish']
 export const CACHE_KEY = '__STEELBRAIN_CONSISTENT_ENV_V1'
 export const assign = Object.assign || function (target, source) {
   for (const key in source) {
-    if (source.hasOwnProperty(key)) {
+    if ({}.hasOwnProperty.call(source, key)) {
       target[key] = source[key]
     }
   }
@@ -17,16 +18,14 @@ export const assign = Object.assign || function (target, source) {
 }
 
 export function identifyEnvironment() {
-  let environment
-  const {command, parameters, options} = getCommand()
+  const { command, parameters, options } = getCommand()
   options.timeout = SPAWN_TIMEOUT
-  environment = spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
-  return environment
+  return spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
 }
 
 export function identifyEnvironmentAsync() {
   return new Promise(function(resolve, reject) {
-    const {command, parameters, options} = getCommand()
+    const { command, parameters, options } = getCommand()
     const childProcess = spawn(command, parameters, options)
     const stdout = []
     const timer = setTimeout(function() {
@@ -46,7 +45,7 @@ export function identifyEnvironmentAsync() {
   })
 }
 
-export function parse(rawEnvironment) {
+export function parse(rawEnvironment: Array<string>) {
   const environment = {}
   for (const chunk of rawEnvironment) {
     const index = chunk.indexOf('=')
@@ -59,7 +58,7 @@ export function parse(rawEnvironment) {
   return environment
 }
 
-export function applySugar(environment) {
+export function applySugar(environment: Object) {
   let path = process.env.PATH ? process.env.PATH.split(':') : []
   if (environment.PATH) {
     for (const chunk of environment.PATH.split(':')) {
@@ -81,17 +80,17 @@ export function applySugar(environment) {
     }
   }
 
-  environment.PATH = path.join(':')
+  environment.PATH = uniqueArray(path).join(':')
   environment.PWD = environment.OLDPWD = process.cwd()
   return environment
 }
 
-export function getCommand() {
-  let command = process.env.SHELL
-  let parameters
-  let options = {encoding: 'utf8'}
+export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
+  const command = process.env.SHELL || 'sh'
+  const options = { encoding: 'utf8' }
+  let parameters = ['-c', 'env;exit']
 
-  const shell = Path.basename(process.env.SHELL)
+  const shell = Path.basename(command)
   if (shell === 'bash') {
     parameters = ['-c', 'source ~/.bashrc;source ~/.bash_profile;env;exit']
   } else if (shell === 'zsh') {
@@ -100,5 +99,5 @@ export function getCommand() {
     parameters = ['-c', 'source ~/.config/fish/config.fish;env;exit']
   }
 
-  return {command, parameters, options}
+  return { command, parameters, options }
 }

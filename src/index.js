@@ -1,4 +1,4 @@
-'use strict'
+/* @flow */
 
 import Path from 'path'
 import { CACHE_KEY, KNOWN_SHELLS, assign, parse, applySugar, identifyEnvironment, identifyEnvironmentAsync } from './helpers'
