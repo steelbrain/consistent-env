@@ -1,3 +1,7 @@
+## v1.3.0
+
+- Add `.bash_profile` support for bash
+
 ## v1.2.0
 
 - Show more meaningful errors

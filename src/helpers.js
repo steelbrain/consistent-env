@@ -93,7 +93,7 @@ export function getCommand() {
 
   const shell = Path.basename(process.env.SHELL)
   if (shell === 'bash') {
-    parameters = ['-c', 'source ~/.bashrc;env;exit']
+    parameters = ['-c', 'source ~/.bashrc;source ~/.bash_profile;env;exit']
   } else if (shell === 'zsh') {
     parameters = ['-c', 'source ~/.zshrc;env;exit']
   } else if (shell === 'fish') {
