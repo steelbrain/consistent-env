@@ -10,7 +10,7 @@ dependencies:
     - npm prune
     - npm install
     - apm rebuild
-    - npm run build
+    - npm run compile
 
 test:
   override:
