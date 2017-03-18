@@ -1,5 +1,7 @@
 # Consistent-Env
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/steelbrain/consistent-env.svg)](https://greenkeeper.io/)
+
 `consistent-env` is an npm module that gives you the correct ENV, consistently. It's especially useful for OSX GUI apps, because due to an OS limitation they are not given proper env variables. This package also caches the result which results in a performance boost when a lot of packages are relying on it, it also doesn't modify the globals so using it in dependencies is safe.
 
 ## Installation
