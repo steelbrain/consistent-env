@@ -81,7 +81,8 @@ export function applySugar(environment: Object) {
   }
 
   environment.PATH = uniqueArray(path).join(':')
-  environment.PWD = environment.OLDPWD = process.cwd()
+  environment.PWD = process.cwd()
+  environment.OLDPWD = environment.PWD
   return environment
 }
 
