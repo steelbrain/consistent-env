@@ -1,6 +1,7 @@
 /* @flow */
 
 import Path from 'path'
+import coolTrim from 'cool-trim'
 import uniqueArray from 'lodash.uniq'
 import { spawn, spawnSync } from 'child_process'
 
@@ -17,10 +18,14 @@ export const assign = Object.assign || function (target, source) {
   return target
 }
 
+export function splitEnv(contents: string) {
+  return contents.split(contents.includes('\0') ? '\0' : '\n')
+}
+
 export function identifyEnvironment() {
   const { command, parameters, options } = getCommand()
   options.timeout = SPAWN_TIMEOUT
-  return spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
+  return splitEnv(spawnSync(command, parameters, options).stdout.toString())
 }
 
 export function identifyEnvironmentAsync() {
@@ -32,12 +37,13 @@ export function identifyEnvironmentAsync() {
       childProcess.kill()
       reject(new Error('Process execution timed out'))
     }, SPAWN_TIMEOUT)
+    childProcess.stdin.end(options.input)
     childProcess.stdout.on('data', function(chunk) {
       stdout.push(chunk)
     })
     childProcess.on('close', function() {
       clearTimeout(timer)
-      resolve(stdout.join('').trim().split('\n'))
+      resolve(splitEnv(stdout.join('')))
     })
     childProcess.on('error', function(error) {
       reject(error)
@@ -50,8 +56,8 @@ export function parse(rawEnvironment: Array<string>): Object {
   for (const chunk of rawEnvironment) {
     const index = chunk.indexOf('=')
     if (index !== -1) {
-      const key = chunk.slice(0, index).trim()
-      const value = chunk.slice(index + 1).trim()
+      const key = chunk.slice(0, index)
+      const value = chunk.slice(index + 1)
       environment[key] = value
     }
   }
@@ -86,19 +92,35 @@ export function applySugar(environment: Object) {
   return environment
 }
 
+const pythonCode = 'import os;print("\0".join(map("=".join, dict(os.environ).items())))'
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
+  const shellScript = coolTrim`
+    if [ "$(which python)" != "" ]; then
+      python -c '${pythonCode}'
+    elif [ "$(which python3)" != "" ]; then
+      python3 -c '${pythonCode}'
+    elif [ "$(which python2.7)" != "" ]; then
+      python2.7 -c '${pythonCode}'
+    else
+      env
+    fi
+  `
   const command = process.env.SHELL || 'sh'
-  const options = { encoding: 'utf8' }
-  let parameters = ['-c', 'env;exit']
+  const options: Object = { encoding: 'utf8' }
+  const stdin = []
 
   const shell = Path.basename(command)
   if (shell === 'bash') {
-    parameters = ['-c', 'source ~/.bashrc;source ~/.bash_profile;env;exit']
+    stdin.push('source ~/.bashrc 2>/dev/null')
+    stdin.push('source ~/.bash_profile 2>/dev/null')
   } else if (shell === 'zsh') {
-    parameters = ['-c', 'source ~/.zshrc;env;exit']
+    stdin.push('source ~/.zshrc 2>/dev/null')
   } else if (shell === 'fish') {
-    parameters = ['-c', 'source ~/.config/fish/config.fish;env;exit']
+    stdin.push('source ~/.config/fish/config.fish 2>/dev/null')
   }
+  stdin.push(shellScript)
+  stdin.push('exit')
+  options.input = stdin.join('\n')
 
-  return { command, parameters, options }
+  return { command, parameters: [], options }
 }
