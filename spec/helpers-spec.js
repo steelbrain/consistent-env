@@ -22,6 +22,16 @@ describe('Helpers', function() {
       expect(raw).toContain('PATH=')
       expect(raw).toContain('SHELL=')
     })
+    it('works with newlines', async function() {
+      process.env.CONSISTENT_ENV_MULTILINE_TEST = 'line1\nline2'
+      const raw = await Helpers.identifyEnvironmentAsync()
+      expect(raw).toContain('CONSISTENT_ENV_MULTILINE_TEST=line1\nline2')
+    })
+    it('works with spaces', async function() {
+      process.env.CONSISTENT_ENV_WHITESPACE_TEST = ' text '
+      const raw = await Helpers.identifyEnvironmentAsync()
+      expect(raw).toContain('CONSISTENT_ENV_WHITESPACE_TEST= text ')
+    })
     it('throws an error if it cant work', function() {
       process.env.SHELL = '/ha'
       expect(function() {
@@ -41,6 +51,16 @@ describe('Helpers', function() {
       expect(raw).toContain('PATH=')
       expect(raw).toContain('SHELL=')
     })
+    it('works with newlines', async function() {
+      process.env.CONSISTENT_ENV_MULTILINE_TEST = 'line1\nline2'
+      const raw = await Helpers.identifyEnvironmentAsync()
+      expect(raw).toContain('CONSISTENT_ENV_MULTILINE_TEST=line1\nline2')
+    })
+    it('works with spaces', async function() {
+      process.env.CONSISTENT_ENV_WHITESPACE_TEST = ' text '
+      const raw = await Helpers.identifyEnvironmentAsync()
+      expect(raw).toContain('CONSISTENT_ENV_WHITESPACE_TEST= text ')
+    })
     it('throws an error if it cant work', async function() {
       process.env.SHELL = '/ha'
       try {
@@ -54,15 +74,13 @@ describe('Helpers', function() {
   })
 
   describe('parse', function() {
-    it('parses properly ignoring spaces', function() {
-      const env = `
-        PATH=/usr/local/bin
-        HOME=/home/steel
-      `.split('\n')
+    it('parses properly with spaces', function() {
+      const env = ['PATH=/usr/local/bin', 'HOME=/home/steel', 'WHITESPACE_TEST= text ']
       const parsed = Helpers.parse(env)
-      expect(Object.keys(parsed)).toEqual(['PATH', 'HOME'])
+      expect(Object.keys(parsed)).toEqual(['PATH', 'HOME', 'WHITESPACE_TEST'])
       expect(parsed.PATH).toBe('/usr/local/bin')
       expect(parsed.HOME).toBe('/home/steel')
+      expect(parsed.WHITESPACE_TEST).toBe(' text ')
     })
   })
 
