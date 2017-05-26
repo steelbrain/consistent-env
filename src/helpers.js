@@ -88,15 +88,25 @@ export function applySugar(environment: Object) {
 
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
   // Print the environment separated by \0 in a POSIX compatible (!) way.
-  // Only environment variable names that consist only of alphanumeric
-  // characters and underscores, and begin with an alphabetic character or an
-  // underscore are included.
   const shScript = ('env|' +
+                    // Find all names of potential environment variables.
+                    // This also returns variable assignments that are in the value
+                    // of another environment variable.
                     'sed -n -e "s/^\\([A-Za-z_][A-Za-z0-9_]*\\)=.*/\\1/p"|' +
                     'while read name;' +
                     'do ' +
+                    // Check if the variable name is defined in the shell, thus
+                    // weeding out names that are not real environment variables.
                     '[ "$name" != "_" -a -n "$(eval "printf \\"%s\\" \\"\\${$name+x}\\"")" ]&&' + // eslint-disable-line no-template-curly-in-string
+                    // Retrieve the value with an indirect variable reference.
+                    // This method has the drawback, that we have to ignore all
+                    // environment variables, whose names are not valid identifier.
+                    // As POSIX compatible environment variable names are valid
+                    // identifiers, this shouldn't cause problems.
+                    // The shell defines some variables on its own (like RANDOM).
+                    // Environment variables with the same name will be overwritten.
                     'value="$(eval "printf \\"%s\\" \\"\\${$name}\\"")"&&' + // eslint-disable-line no-template-curly-in-string
+                    // Output the environment variable separated by \0.
                     'printf "%s=%s\\0" "$name" "$value";' +
                     'done;' +
                     'exit;')
