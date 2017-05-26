@@ -87,8 +87,11 @@ export function applySugar(environment: Object) {
 }
 
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
-  // Print the environment separated by \0 in a POSIX compatible (!) way.
-  const shScript = ('env|' +
+  // Print the environment separated by \0
+  const shScript = ('python -c "import os;print(\\"\\0\\".join(map(\\"=\\".join, dict(os.environ).items()))+\\"\\0\\")"||' +
+                    // If python is not available, fallback to a POSIX compatible
+                    // way of retrieving the environment separated by \0.
+                    'env|' +
                     // Find all names of potential environment variables.
                     // This also returns variable assignments that are in the value
                     // of another environment variable.
