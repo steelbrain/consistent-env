@@ -27,6 +27,12 @@ describe('Helpers', function() {
       const raw = await Helpers.identifyEnvironmentAsync()
       expect(raw).toContain('CONSISTENT_ENV_MULTILINE_TEST=line1\nline2')
     })
+    it('works with variable assignments in values', async function() {
+      process.env.CONSISTENT_ENV_BOX_TEST = 'line\nCONSISTENT_ENV_BOX_FAIL=text'
+      let raw = await Helpers.identifyEnvironmentAsync()
+      raw = raw.map(e => e.split('=')[0])
+      expect(raw).not.toContain('CONSISTENT_ENV_BOX_FAIL')
+    })
     it('works with spaces', async function() {
       process.env.CONSISTENT_ENV_WHITESPACE_TEST = ' text '
       const raw = await Helpers.identifyEnvironmentAsync()
@@ -55,6 +61,12 @@ describe('Helpers', function() {
       process.env.CONSISTENT_ENV_MULTILINE_TEST = 'line1\nline2'
       const raw = await Helpers.identifyEnvironmentAsync()
       expect(raw).toContain('CONSISTENT_ENV_MULTILINE_TEST=line1\nline2')
+    })
+    it('works with variable assignments in values', async function() {
+      process.env.CONSISTENT_ENV_BOX_TEST = 'line\nCONSISTENT_ENV_BOX_FAIL=text'
+      let raw = await Helpers.identifyEnvironmentAsync()
+      raw = raw.map(e => e.split('=')[0])
+      expect(raw).not.toContain('CONSISTENT_ENV_BOX_FAIL')
     })
     it('works with spaces', async function() {
       process.env.CONSISTENT_ENV_WHITESPACE_TEST = ' text '
