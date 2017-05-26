@@ -92,15 +92,15 @@ export function applySugar(environment: Object) {
   return environment
 }
 
+const pythonCode = 'import os;print("\0".join(map("=".join, dict(os.environ).items())))'
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
-  const pythonFile = Path.join(Path.dirname(__dirname), 'index.py')
   const shellScript = coolTrim`
     if [ "$(which python)" != "" ]; then
-      python ${pythonFile}
+      python -c '${pythonCode}'
     elif [ "$(which python3)" != "" ]; then
-      python3 ${pythonFile}
+      python3 -c '${pythonCode}'
     elif [ "$(which python2.7)" != "" ]; then
-      python2.7 ${pythonFile}
+      python2.7 -c '${pythonCode}'
     else
       env
     fi
