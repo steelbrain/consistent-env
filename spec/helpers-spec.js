@@ -22,6 +22,11 @@ describe('Helpers', function() {
       expect(raw).toContain('PATH=')
       expect(raw).toContain('SHELL=')
     })
+    it('works with newlines', async function() {
+      process.env.CONSISTENT_ENV_MULTILINE_TEST = 'line1\nline2'
+      const raw = await Helpers.identifyEnvironmentAsync()
+      expect(raw).toContain('CONSISTENT_ENV_MULTILINE_TEST=line1\nline2')
+    })
     it('works with spaces', async function() {
       process.env.CONSISTENT_ENV_WHITESPACE_TEST = ' text '
       const raw = await Helpers.identifyEnvironmentAsync()
@@ -45,6 +50,11 @@ describe('Helpers', function() {
       raw = raw.join('\n')
       expect(raw).toContain('PATH=')
       expect(raw).toContain('SHELL=')
+    })
+    it('works with newlines', async function() {
+      process.env.CONSISTENT_ENV_MULTILINE_TEST = 'line1\nline2'
+      const raw = await Helpers.identifyEnvironmentAsync()
+      expect(raw).toContain('CONSISTENT_ENV_MULTILINE_TEST=line1\nline2')
     })
     it('works with spaces', async function() {
       process.env.CONSISTENT_ENV_WHITESPACE_TEST = ' text '
