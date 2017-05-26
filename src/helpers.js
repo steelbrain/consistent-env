@@ -20,7 +20,7 @@ export const assign = Object.assign || function (target, source) {
 export function identifyEnvironment() {
   const { command, parameters, options } = getCommand()
   options.timeout = SPAWN_TIMEOUT
-  return spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
+  return spawnSync(command, parameters, options).stdout.toString().split('\n')
 }
 
 export function identifyEnvironmentAsync() {
@@ -37,7 +37,7 @@ export function identifyEnvironmentAsync() {
     })
     childProcess.on('close', function() {
       clearTimeout(timer)
-      resolve(stdout.join('').trim().split('\n'))
+      resolve(stdout.join('').split('\n'))
     })
     childProcess.on('error', function(error) {
       reject(error)
@@ -50,8 +50,8 @@ export function parse(rawEnvironment: Array<string>): Object {
   for (const chunk of rawEnvironment) {
     const index = chunk.indexOf('=')
     if (index !== -1) {
-      const key = chunk.slice(0, index).trim()
-      const value = chunk.slice(index + 1).trim()
+      const key = chunk.slice(0, index)
+      const value = chunk.slice(index + 1)
       environment[key] = value
     }
   }
