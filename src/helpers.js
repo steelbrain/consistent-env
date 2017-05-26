@@ -17,10 +17,14 @@ export const assign = Object.assign || function (target, source) {
   return target
 }
 
+export function splitEnv(contents: string) {
+  return contents.split(contents.includes('\0') ? '\0' : '\n')
+}
+
 export function identifyEnvironment() {
   const { command, parameters, options } = getCommand()
   options.timeout = SPAWN_TIMEOUT
-  return spawnSync(command, parameters, options).stdout.toString().split('\0')
+  return splitEnv(spawnSync(command, parameters, options).stdout.toString())
 }
 
 export function identifyEnvironmentAsync() {
@@ -32,12 +36,13 @@ export function identifyEnvironmentAsync() {
       childProcess.kill()
       reject(new Error('Process execution timed out'))
     }, SPAWN_TIMEOUT)
+    childProcess.stdin.end(options.input)
     childProcess.stdout.on('data', function(chunk) {
       stdout.push(chunk)
     })
     childProcess.on('close', function() {
       clearTimeout(timer)
-      resolve(stdout.join('').split('\0'))
+      resolve(splitEnv(stdout.join('')))
     })
     childProcess.on('error', function(error) {
       reject(error)
@@ -87,35 +92,34 @@ export function applySugar(environment: Object) {
 }
 
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
-  // Print the environment separated by \0 in a POSIX compatible (!) way.
-  // Only environment variable names that consist only of alphanumeric
-  // characters and underscores, and begin with an alphabetic character or an
-  // underscore are included.
-  const shScript = ('env|' +
-                    'sed -n -e "s/^\\([A-Za-z_][A-Za-z0-9_]*\\)=.*/\\1/p"|' +
-                    'while read name;' +
-                    'do ' +
-                    '[ "$name" != "_" -a -n "$(eval "printf \\"%s\\" \\"\\${$name+x}\\"")" ]&&' + // eslint-disable-line no-template-curly-in-string
-                    'value="$(eval "printf \\"%s\\" \\"\\${$name}\\"")"&&' + // eslint-disable-line no-template-curly-in-string
-                    'printf "%s=%s\\0" "$name" "$value";' +
-                    'done;' +
-                    'exit;')
-  // Wrap the script with sh for incompatible shells.
-  const wrappedShScript = 'sh -c \'' + shScript + '\';exit;'
+  const pythonFile = Path.join(Path.dirname(__dirname), 'index.py')
+  const shellScript = `
+    if [ "$(which python)" != "" ]; then
+      python ${pythonFile}
+    elif [ "$(which python3)" != "" ]; then
+      python3 ${pythonFile}
+    elif [ "$(which python2.7)" != "" ]; then
+      python2.7 ${pythonFile}
+    else
+      env
+    fi
+  `
   const command = process.env.SHELL || 'sh'
-  const options = { encoding: 'utf8' }
-  let parameters = ['-c', wrappedShScript]
+  const options: Object = { encoding: 'utf8' }
+  const stdin = []
 
   const shell = Path.basename(command)
   if (shell === 'bash') {
-    parameters = ['-c', 'source ~/.bashrc;source ~/.bash_profile;' + shScript]
+    stdin.push('source ~/.bashrc 2>/dev/null')
+    stdin.push('source ~/.bash_profile 2>/dev/null')
   } else if (shell === 'zsh') {
-    parameters = ['-c', 'source ~/.zshrc;' + shScript]
+    stdin.push('source ~/.zshrc 2>/dev/null')
   } else if (shell === 'fish') {
-    parameters = ['-c', 'source ~/.config/fish/config.fish;' + wrappedShScript]
-  } else if (shell === 'sh' || shell === 'ksh') {
-    parameters = ['-c', shScript]
+    stdin.push('source ~/.config/fish/config.fish 2>/dev/null')
   }
+  stdin.push(shellScript)
+  stdin.push('exit')
+  options.input = stdin.join('\n')
 
-  return { command, parameters, options }
+  return { command, parameters: [], options }
 }
