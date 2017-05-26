@@ -1,6 +1,7 @@
 /* @flow */
 
 import Path from 'path'
+import coolTrim from 'cool-trim'
 import uniqueArray from 'lodash.uniq'
 import { spawn, spawnSync } from 'child_process'
 
@@ -93,7 +94,7 @@ export function applySugar(environment: Object) {
 
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
   const pythonFile = Path.join(Path.dirname(__dirname), 'index.py')
-  const shellScript = `
+  const shellScript = coolTrim`
     if [ "$(which python)" != "" ]; then
       python ${pythonFile}
     elif [ "$(which python3)" != "" ]; then
