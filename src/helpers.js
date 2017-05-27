@@ -20,7 +20,7 @@ export const assign = Object.assign || function (target, source) {
 export function identifyEnvironment() {
   const { command, parameters, options } = getCommand()
   options.timeout = SPAWN_TIMEOUT
-  return spawnSync(command, parameters, options).stdout.toString().trim().split('\n')
+  return spawnSync(command, parameters, options).stdout.toString().split('\0')
 }
 
 export function identifyEnvironmentAsync() {
@@ -37,7 +37,7 @@ export function identifyEnvironmentAsync() {
     })
     childProcess.on('close', function() {
       clearTimeout(timer)
-      resolve(stdout.join('').trim().split('\n'))
+      resolve(stdout.join('').split('\0'))
     })
     childProcess.on('error', function(error) {
       reject(error)
@@ -50,8 +50,8 @@ export function parse(rawEnvironment: Array<string>): Object {
   for (const chunk of rawEnvironment) {
     const index = chunk.indexOf('=')
     if (index !== -1) {
-      const key = chunk.slice(0, index).trim()
-      const value = chunk.slice(index + 1).trim()
+      const key = chunk.slice(0, index)
+      const value = chunk.slice(index + 1)
       environment[key] = value
     }
   }
@@ -87,17 +87,49 @@ export function applySugar(environment: Object) {
 }
 
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
+  // Print the environment separated by \0
+  const pyScript = 'import os;print(\\"\\0\\".join(map(\\"=\\".join, dict(os.environ).items()))+\\"\\0\\")'
+  const shScript = ('python -c "' + pyScript + '"||' +
+                    'python3 -c "' + pyScript + '"||' +
+                    // If python is not available, fallback to a POSIX compatible
+                    // way of retrieving the environment separated by \0.
+                    'env|' +
+                    // Find all names of potential environment variables.
+                    // This also returns variable assignments that are in the value
+                    // of another environment variable.
+                    'sed -n -e "s/^\\([A-Za-z_][A-Za-z0-9_]*\\)=.*/\\1/p"|' +
+                    'while read name;' +
+                    'do ' +
+                    // Check if the variable name is defined in the shell, thus
+                    // weeding out names that are not real environment variables.
+                    '[ "$name" != "_" -a -n "$(eval "printf \\"%s\\" \\"\\${$name+x}\\"")" ]&&' + // eslint-disable-line no-template-curly-in-string
+                    // Retrieve the value with an indirect variable reference.
+                    // This method has the drawback, that we have to ignore all
+                    // environment variables, whose names are not valid identifier.
+                    // As POSIX compatible environment variable names are valid
+                    // identifiers, this shouldn't cause problems.
+                    // The shell defines some variables on its own (like RANDOM).
+                    // Environment variables with the same name will be overwritten.
+                    'value="$(eval "printf \\"%s\\" \\"\\${$name}\\"")"&&' + // eslint-disable-line no-template-curly-in-string
+                    // Output the environment variable separated by \0.
+                    'printf "%s=%s\\0" "$name" "$value";' +
+                    'done;' +
+                    'exit;')
+  // Wrap the script with sh for incompatible shells.
+  const wrappedShScript = 'sh -c \'' + shScript + '\';exit;'
   const command = process.env.SHELL || 'sh'
   const options = { encoding: 'utf8' }
-  let parameters = ['-c', 'env;exit']
+  let parameters = ['-c', wrappedShScript]
 
   const shell = Path.basename(command)
   if (shell === 'bash') {
-    parameters = ['-c', 'source ~/.bashrc;source ~/.bash_profile;env;exit']
+    parameters = ['-c', 'source ~/.bashrc;source ~/.bash_profile;' + shScript]
   } else if (shell === 'zsh') {
-    parameters = ['-c', 'source ~/.zshrc;env;exit']
+    parameters = ['-c', 'source ~/.zshrc;' + shScript]
   } else if (shell === 'fish') {
-    parameters = ['-c', 'source ~/.config/fish/config.fish;env;exit']
+    parameters = ['-c', 'source ~/.config/fish/config.fish;' + wrappedShScript]
+  } else if (shell === 'sh' || shell === 'ksh') {
+    parameters = ['-c', shScript]
   }
 
   return { command, parameters, options }
