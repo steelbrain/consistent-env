@@ -88,7 +88,9 @@ export function applySugar(environment: Object) {
 
 export function getCommand(): { command: string, options: Object, parameters: Array<string> } {
   // Print the environment separated by \0
-  const shScript = ('python -c "import os;print(\\"\\0\\".join(map(\\"=\\".join, dict(os.environ).items()))+\\"\\0\\")"||' +
+  const pyScript = 'import os;print(\\"\\0\\".join(map(\\"=\\".join, dict(os.environ).items()))+\\"\\0\\")'
+  const shScript = ('python -c "' + pyScript + '"||' +
+                    'python3 -c "' + pyScript + '"||' +
                     // If python is not available, fallback to a POSIX compatible
                     // way of retrieving the environment separated by \0.
                     'env|' +
