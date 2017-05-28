@@ -1,3 +1,7 @@
+## v1.3.1
+
+- Fix support for multi-line environment variables
+
 ## v1.3.0
 
 - Add `.bash_profile` support for bash
